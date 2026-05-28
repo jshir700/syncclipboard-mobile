@@ -46,20 +46,18 @@ jobs:
         run: |
           ruby -e '
             podfile = File.read("ios/Podfile")
-            patch = <<~RUBY
-              installer.pods_project.build_configurations.each do |config|
-                config.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"
-                config.build_settings["SWIFT_VERSION"] = "5.9"
-              end
-              installer.pods_project.targets.each do |target|
-                target.build_configurations.each do |config|
-                  config.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"
-                  config.build_settings["SWIFT_VERSION"] = "5.9"
-                end
-              end
-            RUBY
-            podfile.sub!("post_install do |installer|", "post_install do |installer|\n#{patch}")
+            patch = %Q(
+              installer.pods_project.build_configurations.each {|c| c.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"}
+              installer.pods_project.targets.each {|t| t.build_configurations.each {|c| c.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"}}
+            ).strip
+            if podfile["post_install do |installer|"]
+              podfile.sub!("post_install do |installer|", "post_install do |installer|\n  #{patch}")
+            else
+              podfile << "\npost_install do |installer|\n  #{patch}\nend\n"
+            end
             File.write("ios/Podfile", podfile)
+            puts "=== Patched Podfile last 20 lines ==="
+            puts File.readlines("ios/Podfile").last(20).join
           '
 
       - name: Install pods
