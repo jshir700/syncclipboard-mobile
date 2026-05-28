@@ -44,21 +44,28 @@ jobs:
 
       - name: Patch Podfile for Swift 6 concurrency
         run: |
-          ruby -e '
-            podfile = File.read("ios/Podfile")
-            patch = %Q(
-              installer.pods_project.build_configurations.each {|c| c.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"}
-              installer.pods_project.targets.each {|t| t.build_configurations.each {|c| c.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"}}
-            ).strip
-            if podfile["post_install do |installer|"]
-              podfile.sub!("post_install do |installer|", "post_install do |installer|\n  #{patch}")
-            else
-              podfile << "\npost_install do |installer|\n  #{patch}\nend\n"
+          echo "=== Original Podfile (first 5 lines) ==="
+          head -5 ios/Podfile
+          echo "=== Original Podfile (last 20 lines) ==="
+          tail -20 ios/Podfile
+
+          ruby -e "
+            lines = File.readlines('ios/Podfile')
+            modified = false
+            lines.each_with_index do |line, i|
+              if line.match?(/^\s*post_install\s+do/)
+                lines.insert(i + 1, %(  installer.pods_project.build_configurations.each {|c| c.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'}\n  installer.pods_project.targets.each {|t| t.build_configurations.each {|c| c.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'}}\n))
+                modified = true
+                break
+              end
             end
-            File.write("ios/Podfile", podfile)
-            puts "=== Patched Podfile last 20 lines ==="
-            puts File.readlines("ios/Podfile").last(20).join
-          '
+            unless modified
+              lines << %(\npost_install do |installer|\n  installer.pods_project.build_configurations.each {|c| c.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'}\n  installer.pods_project.targets.each {|t| t.build_configurations.each {|c| c.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'}}\nend\n)
+            end
+            File.write('ios/Podfile', lines.join)
+          "
+          echo "=== Patched Podfile (last 20 lines) ==="
+          tail -20 ios/Podfile
 
       - name: Install pods
         run: cd ios && pod install
