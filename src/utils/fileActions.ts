@@ -3,11 +3,12 @@
  * 文件操作公共函数 - 打开、分享文件
  */
 
+import { Platform } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { nativeCopyFile, nativeSaveFileToDownloads } from 'native-util';
 import i18n from '@/i18n';
 
-const APP_PACKAGE = 'com.jericx.syncclipboardmobile';
+const APP_PACKAGE = 'com.jshir700.syncclipboardmobile';
 
 /**
  * 检测 SAF 返回的目录 URI 是否是 Downloads 根目录。
@@ -57,6 +58,15 @@ function getMimeTypeFromUri(fileUri: string): string {
  * - Android 7+ 要求使用 content:// URI
  */
 export async function openFile(fileUri: string): Promise<void> {
+  if (Platform.OS !== 'android') {
+    // On iOS, use Sharing to let the user open the file
+    const Sharing = await import('expo-sharing');
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(fileUri);
+    }
+    return;
+  }
+
   const FileSystem = await import('expo-file-system/legacy');
   const IntentLauncher = await import('expo-intent-launcher');
   const mimeType = getMimeTypeFromUri(fileUri);

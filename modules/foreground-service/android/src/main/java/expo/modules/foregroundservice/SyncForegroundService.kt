@@ -16,7 +16,7 @@ class SyncForegroundService : Service() {
 
     companion object {
         private const val TAG = "SyncForegroundService"
-        private const val APP_PACKAGE = "com.jericx.syncclipboardmobile"
+        private const val APP_PACKAGE = "com.jshir700.syncclipboardmobile"
         const val CHANNEL_ID = "syncclipboard_foreground"
         const val NOTIFY_ID = 0x2020
         const val ACTION_START = "START"
@@ -255,7 +255,7 @@ class SyncForegroundService : Service() {
         }
 
         val restartIntent = Intent().apply {
-            setClassName(packageName, "com.jericx.syncclipboardmobile.servicerestart.ServiceRestartActivity")
+            setClassName(packageName, "com.jshir700.syncclipboardmobile.servicerestart.ServiceRestartActivity")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
         val pendingIntent = PendingIntent.getActivity(

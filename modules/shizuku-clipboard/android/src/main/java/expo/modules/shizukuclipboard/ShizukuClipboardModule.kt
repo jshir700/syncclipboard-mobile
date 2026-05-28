@@ -36,7 +36,7 @@ class ShizukuClipboardModule : Module() {
     private val userServiceArgs by lazy {
         Shizuku.UserServiceArgs(
             ComponentName(
-                appContext.reactContext?.packageName ?: "com.jericx.syncclipboardmobile",
+                appContext.reactContext?.packageName ?: "com.jshir700.syncclipboardmobile",
                 ClipboardUserService::class.java.name
             )
         )

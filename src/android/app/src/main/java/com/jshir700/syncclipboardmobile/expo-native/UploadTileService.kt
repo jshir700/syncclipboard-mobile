@@ -1,4 +1,4 @@
-package com.jericx.syncclipboardmobile.quicksettings
+package com.jshir700.syncclipboardmobile.quicksettings
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -9,10 +9,11 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import expo.modules.nativeutil.NativeLogger
 
-class DownloadTileService : TileService() {
+@SuppressLint("StartActivityAndCollapseDeprecated")
+class UploadTileService : TileService() {
 
     companion object {
-        private const val TAG = "DownloadTileService"
+        private const val TAG = "UploadTileService"
     }
 
     override fun onStartListening() {
@@ -27,7 +28,6 @@ class DownloadTileService : TileService() {
         super.onStopListening()
     }
 
-    @SuppressLint("StartActivityAndCollapseDeprecated")
     override fun onClick() {
         super.onClick()
         NativeLogger.d(TAG, "Quick Settings Tile clicked")
@@ -35,9 +35,9 @@ class DownloadTileService : TileService() {
             val intent = Intent().apply {
                 component = ComponentName(
                     applicationContext,
-                    "com.jericx.syncclipboardmobile.quickaction.QuickActionActivity"
+                    "com.jshir700.syncclipboardmobile.quickaction.QuickActionActivity"
                 )
-                putExtra("direction", "download")
+                putExtra("direction", "upload")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             
@@ -45,7 +45,7 @@ class DownloadTileService : TileService() {
                 // API 34+ - use PendingIntent
                 val pendingIntent = PendingIntent.getActivity(
                     this,
-                    0,
+                    1,
                     intent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
@@ -68,4 +68,3 @@ class DownloadTileService : TileService() {
         super.onTileRemoved()
     }
 }
-

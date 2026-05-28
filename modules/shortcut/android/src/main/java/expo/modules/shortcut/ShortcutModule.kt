@@ -19,7 +19,7 @@ import expo.modules.kotlin.modules.ModuleDefinition
 
 class ShortcutModule : Module() {
     companion object {
-        private const val APP_PACKAGE = "com.jericx.syncclipboardmobile"
+        private const val APP_PACKAGE = "com.jshir700.syncclipboardmobile"
         private const val DOWNLOAD_SHORTCUT_ID = "shortcut_download"
         private const val DOWNLOAD_DIRECTION = "download"
         private const val DOWNLOAD_ICON_RES = "ic_tile_download"
@@ -30,7 +30,7 @@ class ShortcutModule : Module() {
         private const val UPLOAD_ICON_RES = "ic_tile_upload"
         private const val UPLOAD_BG_COLOR = "#007AFF"
 
-        private const val QUICK_ACTION_ACTIVITY = "com.jericx.syncclipboardmobile.quickaction.QuickActionActivity"
+        private const val QUICK_ACTION_ACTIVITY = "com.jshir700.syncclipboardmobile.quickaction.QuickActionActivity"
 
         private fun getAppString(context: Context, name: String): String {
             val resId = context.resources.getIdentifier(name, "string", APP_PACKAGE)

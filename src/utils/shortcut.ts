@@ -1,19 +1,20 @@
 import { Platform } from 'react-native';
-import {
-  requestPinDownloadShortcut,
-  requestPinUploadShortcut,
-  isShortcutModuleAvailable,
-} from 'shortcut';
+
+const getShortcutModule = () => {
+  if (Platform.OS !== 'android') return null;
+  try { return require('shortcut'); } catch { return null; }
+};
 
 export const shortcut = {
   addDownloadShortcut(): Promise<boolean> {
     if (Platform.OS !== 'android') {
       return Promise.reject(new Error('Home-screen shortcuts are only supported on Android'));
     }
-    if (!isShortcutModuleAvailable) {
+    const mod = getShortcutModule();
+    if (!mod?.isShortcutModuleAvailable) {
       return Promise.reject(new Error('ShortcutModule is not available'));
     }
-    return requestPinDownloadShortcut().catch((error) => {
+    return mod.requestPinDownloadShortcut().catch((error) => {
       console.error('ShortcutModule addDownloadShortcut error:', error);
       throw error;
     });
@@ -23,10 +24,11 @@ export const shortcut = {
     if (Platform.OS !== 'android') {
       return Promise.reject(new Error('Home-screen shortcuts are only supported on Android'));
     }
-    if (!isShortcutModuleAvailable) {
+    const mod = getShortcutModule();
+    if (!mod?.isShortcutModuleAvailable) {
       return Promise.reject(new Error('ShortcutModule is not available'));
     }
-    return requestPinUploadShortcut().catch((error) => {
+    return mod.requestPinUploadShortcut().catch((error) => {
       console.error('ShortcutModule addUploadShortcut error:', error);
       throw error;
     });

@@ -10,7 +10,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  ToastAndroid,
   Animated,
   Pressable,
   Dimensions,
@@ -22,6 +21,7 @@ import * as Clipboard from 'expo-clipboard';
 import { Segment, useDefault } from 'segmentit';
 import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from 'react-i18next';
+import { showToast } from '@/utils/toast';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.75;
@@ -196,7 +196,7 @@ export const WordPickerScreen: React.FC<WordPickerScreenProps> = ({ text, onComp
     const selectedText = tokens.filter((_, i) => selected.has(i)).join('');
     if (selectedText) {
       await Clipboard.setStringAsync(selectedText);
-      ToastAndroid.show(t('wordPicker.copied'), ToastAndroid.SHORT);
+      showToast(t('wordPicker.copied'));
     }
   }, [tokens, selected]);
 

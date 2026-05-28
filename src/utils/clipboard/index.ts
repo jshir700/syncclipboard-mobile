@@ -8,6 +8,7 @@ export {
   historyItemToDto as clipboardItemToDto,
   contentToProfileDto,
   profileDtoToContent,
+  profileDtoToContentAsync,
   getExtensionFromMimeType,
   getExtensionFromFileName,
   getClipboardTypeDisplayName,

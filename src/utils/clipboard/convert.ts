@@ -8,6 +8,11 @@ import { HistoryItem, HistorySyncStatus, createHistoryItem } from '@/types/clipb
 import { ClipboardContentType, ProfileDto } from '@/types/api';
 import { ClipboardContent } from '@/types';
 import { calculateContentHash } from '@/utils/hash';
+import {
+  getState as getEncryptionState,
+  encryptText,
+  decryptText,
+} from '@/services/crypto/CryptoService';
 
 // ─── ProfileDto ↔ ClipboardContent ────────────────────────────────────────────
 
@@ -28,54 +33,118 @@ export async function contentToProfileDto(
     profileHash = await calculateContentHash(content, options?.signal);
   }
 
-  switch (type) {
-    case 'Text': {
-      if (fileUri && fileName) {
+  // Encrypt text if E2E encryption is enabled
+  let encrypted = false;
+  if (getEncryptionState().enabled) {
+    try {
+      text = await encryptText(text);
+      encrypted = true;
+    } catch (e) {
+      console.warn('Failed to encrypt clipboard text:', e);
+    }
+  }
+
+  const dto: ProfileDto = (() => {
+    switch (type) {
+      case 'Text': {
+        if (fileUri && fileName) {
+          return {
+            type: 'Text',
+            text,
+            hash: profileHash,
+            hasData: true,
+            dataName: fileName,
+            size: fileSize,
+          };
+        }
+        return { type: 'Text', text, hash: profileHash, hasData: false };
+      }
+      case 'Image':
         return {
-          type: 'Text',
-          text,
+          type: 'Image',
+          text: text || '[图片]',
           hash: profileHash,
           hasData: true,
           dataName: fileName,
           size: fileSize,
         };
-      }
-      return { type: 'Text', text, hash: profileHash, hasData: false };
+      case 'File':
+        return {
+          type: 'File',
+          text: text || fileName || '[文件]',
+          hash: profileHash,
+          hasData: true,
+          dataName: fileName,
+          size: fileSize,
+        };
+      case 'Group':
+        return {
+          type: 'Group',
+          text: text || '[文件组]',
+          hash: profileHash,
+          hasData: true,
+          dataName: fileName,
+          size: fileSize,
+        };
+      default:
+        throw new Error(`Unsupported clipboard type: ${type}`);
     }
-    case 'Image':
-      return {
-        type: 'Image',
-        text: text || '[图片]',
-        hash: profileHash,
-        hasData: true,
-        dataName: fileName,
-        size: fileSize,
-      };
-    case 'File':
-      return {
-        type: 'File',
-        text: text || fileName || '[文件]',
-        hash: profileHash,
-        hasData: true,
-        dataName: fileName,
-        size: fileSize,
-      };
-    case 'Group':
-      return {
-        type: 'Group',
-        text: text || '[文件组]',
-        hash: profileHash,
-        hasData: true,
-        dataName: fileName,
-        size: fileSize,
-      };
-    default:
-      throw new Error(`Unsupported clipboard type: ${type}`);
-  }
+  })();
+
+  return { ...dto, encrypted };
 }
 
 /**
  * 将 ProfileDto 转换为 ClipboardContent
+ */
+export function profileDtoToContent(profile: ProfileDto): ClipboardContent {
+  const { type, text, hash, hasData, dataName, size } = profile;
+
+export async function profileDtoToContentAsync(profile: ProfileDto): Promise<ClipboardContent> {
+  const { type, text, hash, hasData, dataName, size, encrypted } = profile;
+
+  let contentText = text;
+
+  // Decrypt if the profile is encrypted
+  if (encrypted && getEncryptionState().enabled) {
+    try {
+      contentText = await decryptText(text);
+    } catch (e) {
+      console.warn('Failed to decrypt clipboard text:', e);
+      // Return as-is with encrypted text — user will see garbled content
+    }
+  }
+
+  const baseContent: ClipboardContent = {
+    type: type as ClipboardContentType,
+    text: contentText,
+    profileHash: hash,
+    timestamp: Date.now(),
+    hasData,
+  };
+
+  if (hasData) {
+    switch (type) {
+      case 'Text':
+        return { ...baseContent, fileName: dataName, fileSize: size || text?.length || 0 };
+      case 'Image':
+        return { ...baseContent, fileName: dataName, fileSize: size };
+      case 'File':
+      case 'Group':
+        return { ...baseContent, fileName: dataName, fileSize: size };
+    }
+  }
+
+  if (type === 'Text') {
+    return { ...baseContent, fileSize: size || text?.length || 0 };
+  }
+
+  return baseContent;
+}
+
+/**
+ * 将 ProfileDto 转换为 ClipboardContent（同步版本，不解密）
+ * @deprecated Use profileDtoToContentAsync for encryption support
  */
 export function profileDtoToContent(profile: ProfileDto): ClipboardContent {
   const { type, text, hash, hasData, dataName, size } = profile;

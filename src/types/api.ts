@@ -29,6 +29,9 @@ export interface ProfileDto {
 
   /** 文件大小（字节） */
   size?: number;
+
+  /** 是否启用端到端加密 */
+  encrypted?: boolean;
 }
 
 /**

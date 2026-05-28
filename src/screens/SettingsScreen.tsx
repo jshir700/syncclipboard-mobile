@@ -47,12 +47,15 @@ import {
   formatFileSize,
 } from '@/utils';
 import { Plus, RefreshCw, Check, ChevronDown, ChevronUp } from 'react-native-feather';
-import { hasOverlayPermission, requestOverlayPermission } from 'clipboard-overlay';
-import {
-  isShizukuAvailable,
-  hasShizukuPermission,
-  requestShizukuPermission,
-} from 'shizuku-clipboard';
+// Android-only modules — lazy loaded via Platform.OS guards
+const getClipboardOverlay = () => {
+  if (Platform.OS !== 'android') return null;
+  try { return require('clipboard-overlay'); } catch { return null; }
+};
+const getShizukuClipboard = () => {
+  if (Platform.OS !== 'android') return null;
+  try { return require('shizuku-clipboard'); } catch { return null; }
+};
 import { extractVerificationCode } from '@/tasks/SmsUploadTask';
 import { useTranslation } from 'react-i18next';
 import { useI18n } from '@/hooks/useI18n';
@@ -264,13 +267,13 @@ export const SettingsScreen = () => {
         PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECEIVE_SMS),
       ]);
       setPermNotification(notif);
-      setPermOverlay(hasOverlayPermission());
+      setPermOverlay((getClipboardOverlay()?.hasOverlayPermission() ?? false));
       setPermSms(sms);
       const { isIgnoringBatteryOptimizations } = await import('native-util');
       setPermBattery(isIgnoringBatteryOptimizations());
-      const shizukuUp = isShizukuAvailable();
+      const shizukuUp = (getShizukuClipboard()?.isShizukuAvailable() ?? false);
       setShizukuAvailable(shizukuUp);
-      setPermShizuku(shizukuUp && hasShizukuPermission());
+      setPermShizuku(shizukuUp && (getShizukuClipboard()?.hasShizukuPermission() ?? false));
     } catch (e) {
       console.warn('[Settings] Failed to check permissions:', e);
     } finally {
@@ -580,8 +583,8 @@ export const SettingsScreen = () => {
           {
             text: t('settings.confirmOk'),
             onPress: async () => {
-              if (!hasOverlayPermission()) {
-                requestOverlayPermission();
+              if (!(getClipboardOverlay()?.hasOverlayPermission() ?? false)) {
+                getClipboardOverlay()?.requestOverlayPermission();
                 return;
               }
               setLocalClipboardOverlayEnabled(true);
@@ -620,7 +623,7 @@ export const SettingsScreen = () => {
   const handleToggleShizukuClipboard = async (enabled: boolean) => {
     if (enabled && Platform.OS === 'android') {
       // 检查 Shizuku 是否可用
-      if (!isShizukuAvailable()) {
+      if (!(getShizukuClipboard()?.isShizukuAvailable() ?? false)) {
         Alert.alert(t('settings.shizukuNotRunningTitle'), t('settings.shizukuNotRunningMessage'), [
           { text: t('common.cancel'), style: 'cancel' },
           {
@@ -632,8 +635,8 @@ export const SettingsScreen = () => {
       }
 
       // 检查 Shizuku 权限
-      if (!hasShizukuPermission()) {
-        const requested = requestShizukuPermission();
+      if (!(getShizukuClipboard()?.hasShizukuPermission() ?? false)) {
+        const requested = getShizukuClipboard()?.requestShizukuPermission();
         if (!requested) {
           Alert.alert(
             t('settings.permissionRequestFailed'),
@@ -1974,7 +1977,7 @@ export const SettingsScreen = () => {
                 </View>
                 <Switch
                   value={permOverlay}
-                  onValueChange={() => requestOverlayPermission()}
+                  onValueChange={() => getClipboardOverlay()?.requestOverlayPermission()}
                   trackColor={{ false: theme.colors.divider, true: theme.colors.primary }}
                   thumbColor={permOverlay ? theme.colors.surface : theme.colors.textTertiary}
                 />
@@ -2027,7 +2030,7 @@ export const SettingsScreen = () => {
                       return;
                     }
                     if (!permShizuku) {
-                      requestShizukuPermission();
+                      getShizukuClipboard()?.requestShizukuPermission();
                       // 延迟刷新权限状态（等待用户授权）
                       setTimeout(refreshPermissions, 2000);
                     }
@@ -2659,7 +2662,7 @@ export const SettingsScreen = () => {
                     borderColor: theme.colors.primary,
                   },
                 ]}
-                onPress={() => Linking.openURL('https://github.com/Jeric-X/syncclipboard-mobile')}
+                onPress={() => Linking.openURL('https://github.com/jshir700/syncclipboard-mobile')}
               >
                 <Text style={[styles.updateButtonText, { color: theme.colors.white }]}>GitHub</Text>
               </TouchableOpacity>

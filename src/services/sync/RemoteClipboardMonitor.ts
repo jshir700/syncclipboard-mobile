@@ -10,7 +10,7 @@ import type { ProfileChangedEvent, ConnectionState } from 'signalr-client';
 import { getSignalRClient } from 'signalr-client';
 import { setTimer, clearTimer } from 'native-timer';
 import { getAPIClient } from '../ClientFactory';
-import { profileDtoToContent } from '../../utils/clipboard/convert';
+import { profileDtoToContentAsync } from '../../utils/clipboard/convert';
 import { clipboardSyncState } from './SyncState';
 import { configService } from '../ConfigService';
 import { DedupedOperation } from '../../utils/DedupedOperation';
@@ -170,7 +170,7 @@ class RemoteClipboardMonitor {
         dataName: event.dataName,
         size: event.size,
       };
-      const content: ClipboardContent = profileDtoToContent(profile);
+      const content: ClipboardContent = await profileDtoToContentAsync(profile);
       const hash = content.profileHash || content.text;
       if (hash === this._lastContentHash) return;
       this._lastContentHash = hash;
@@ -223,7 +223,7 @@ class RemoteClipboardMonitor {
       const apiClient = await getAPIClient();
       const profile = await apiClient.getClipboard(sig);
       if (!profile) throw new Error('No clipboard data returned');
-      const content: ClipboardContent = profileDtoToContent(profile);
+      const content: ClipboardContent = await profileDtoToContentAsync(profile);
       const hash = content.profileHash || content.text;
       if (hash !== this._lastContentHash) {
         this._lastContentHash = hash;

@@ -14,9 +14,13 @@
  */
 
 import { Platform } from 'react-native';
-import * as ForegroundService from 'foreground-service';
 import { LongRunningTask } from './LongRunningTask';
 import { configService } from '../services/ConfigService';
+
+const getForegroundService = () => {
+  if (Platform.OS !== 'android') return null;
+  try { return require('foreground-service'); } catch { return null; }
+};
 import { backgroundRuntimeState } from '../services/BackgroundRuntimeState';
 
 class ForegroundServiceTask extends LongRunningTask {
@@ -93,7 +97,7 @@ class ForegroundServiceTask extends LongRunningTask {
     this._serviceActive = true;
 
     try {
-      ForegroundService.startService();
+      getForegroundService()?.startService();
       this._attachServiceListeners();
     } catch (e) {
       console.error('[ForegroundServiceTask] Failed to start foreground service:', e);
@@ -110,18 +114,18 @@ class ForegroundServiceTask extends LongRunningTask {
     this._detachServiceListeners();
 
     try {
-      ForegroundService.stopService();
+      getForegroundService()?.stopService();
     } catch {}
   }
 
   /** 绑定通知栏操作监听 */
   private _attachServiceListeners(): void {
-    this._stopSub = ForegroundService.addStopListener(() => {
+    this._stopSub = (getForegroundService()?.addStopListener ?? (() => ({ remove: () => {} })))(() => {
       configService.updateConfig({ enableBackgroundTasks: false }).catch((e) => {
         console.error('[ForegroundServiceTask] Failed to disable background tasks:', e);
       });
     });
-    this._tempStopSub = ForegroundService.addTempStopListener(() => {
+    this._tempStopSub = (getForegroundService()?.addTempStopListener ?? (() => ({ remove: () => {} })))(() => {
       backgroundRuntimeState.setTempDisabled(true);
     });
   }

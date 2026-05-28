@@ -8,6 +8,7 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { QuickTileLoadingScreen } from './src/screens/QuickTileLoadingScreen';
 import { ShareReceiveScreen } from './src/screens/ShareReceiveScreen';
 import { ProcessTextScreen } from './src/screens/ProcessTextScreen';
+import { CryptoActionScreen } from './src/screens/CryptoActionScreen';
 import { SyncDirection } from './src/types/sync';
 import { useSettingsStore } from './src/stores';
 import { initLogger } from './src/utils/Logger';
@@ -18,6 +19,8 @@ import { moveTaskToBack, setExcludeFromRecents } from 'native-util';
 const QUICK_UPLOAD_URL = 'syncclipboard://quick-upload';
 const QUICK_DOWNLOAD_URL = 'syncclipboard://quick-download';
 const PROCESS_TEXT_URL = 'syncclipboard://process-text';
+const ENCRYPT_URL = 'syncclipboard://encrypt';
+const DECRYPT_URL = 'syncclipboard://decrypt';
 
 function parseProcessTextUrl(url: string | null): string | null {
   if (!url || !url.startsWith(PROCESS_TEXT_URL)) return null;
@@ -43,6 +46,38 @@ function parseQuickTileUrl(url: string | null): {
   return { isQuickTile: false, fromForeground: false, direction: SyncDirection.Download };
 }
 
+function parseCryptoUrl(url: string | null): {
+  isCryptoAction: boolean;
+  action: 'encrypt' | 'decrypt';
+  text: string;
+  password?: string;
+  callback?: string;
+} {
+  if (!url) return { isCryptoAction: false, action: 'decrypt', text: '' };
+  try {
+    const u = new URL(url);
+    if (u.protocol === 'syncclipboard:' && u.hostname === 'encrypt') {
+      return {
+        isCryptoAction: true,
+        action: 'encrypt',
+        text: u.searchParams.get('text') || '',
+        password: u.searchParams.get('password') || undefined,
+        callback: u.searchParams.get('callback') || undefined,
+      };
+    }
+    if (u.protocol === 'syncclipboard:' && u.hostname === 'decrypt') {
+      return {
+        isCryptoAction: true,
+        action: 'decrypt',
+        text: u.searchParams.get('text') || '',
+        password: u.searchParams.get('password') || undefined,
+        callback: u.searchParams.get('callback') || undefined,
+      };
+    }
+  } catch {}
+  return { isCryptoAction: false, action: 'decrypt', text: '' };
+}
+
 function isShareIntentUrl(url: string | null): boolean {
   if (!url) return false;
   try {
@@ -62,6 +97,12 @@ export default function App() {
   const [quickActionOverlay, setQuickActionOverlay] = useState<{
     direction: SyncDirection;
     exitAfterSync: boolean;
+  } | null>(null);
+  const [cryptoOverlay, setCryptoOverlay] = useState<{
+    action: 'encrypt' | 'decrypt';
+    text: string;
+    password?: string;
+    callback?: string;
   } | null>(null);
   const { config, loadConfig, isLoaded } = useSettingsStore();
 
@@ -97,6 +138,12 @@ export default function App() {
         setShareReceiveOverlay(true);
         return;
       }
+      const { isCryptoAction, action: cryptoAction, text: cryptoText, password: cryptoPass, callback } = parseCryptoUrl(url);
+      if (isCryptoAction) {
+        setAppMode('home');
+        setCryptoOverlay({ action: cryptoAction, text: cryptoText, password: cryptoPass, callback });
+        return;
+      }
       const processText = parseProcessTextUrl(url);
       if (processText) {
         setAppMode('home');
@@ -119,6 +166,11 @@ export default function App() {
       }
       if (isShareIntentUrl(url)) {
         setShareReceiveOverlay(true);
+        return;
+      }
+      const { isCryptoAction, action: cryptoAction, text: cryptoText, password: cryptoPass, callback } = parseCryptoUrl(url);
+      if (isCryptoAction) {
+        setCryptoOverlay({ action: cryptoAction, text: cryptoText, password: cryptoPass, callback });
         return;
       }
       const processText = parseProcessTextUrl(url);
@@ -166,6 +218,20 @@ export default function App() {
                   }
                 }}
                 overlayMode
+              />
+            </View>
+          )}
+          {cryptoOverlay && (
+            <View style={StyleSheet.absoluteFill}>
+              <CryptoActionScreen
+                action={cryptoOverlay.action}
+                text={cryptoOverlay.text}
+                password={cryptoOverlay.password}
+                callback={cryptoOverlay.callback}
+                onComplete={() => {
+                  setCryptoOverlay(null);
+                  moveTaskToBack();
+                }}
               />
             </View>
           )}

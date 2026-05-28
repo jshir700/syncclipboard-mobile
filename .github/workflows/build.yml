@@ -17,13 +17,16 @@ jobs:
   android-build:
     uses: ./.github/workflows/android-build.yml
 
+  ios-build:
+    uses: ./.github/workflows/ios-build.yml
+
   unit-tests:
     uses: ./.github/workflows/test.yml
 
   publish-release:
     name: Publish GitHub Release
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
-    needs: [publish-gitee-release-upload]
+    needs: [ios-build, publish-gitee-release-upload]
     runs-on: ubuntu-latest
 
     steps:
@@ -42,13 +45,21 @@ jobs:
           path: apk/
           merge-multiple: true
 
+      - name: Download IPA artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ipa-unsigned
+          path: ipa/
+
       - name: Publish Release
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           prerelease: ${{ contains(github.ref_name, 'beta') }}
           bodyFile: feature.txt
-          artifacts: apk/*.apk
+          artifacts: |
+            apk/*.apk
+            ipa/*.ipa
 
   sync-to-gitee:
     name: Sync to Gitee
