@@ -46,11 +46,17 @@ jobs:
         run: |
           cat >> ios/Podfile << 'EOF'
 
-          # Patch: disable Swift 6 strict concurrency for all pods
           post_install do |installer|
+            # Disable Swift 6 strict concurrency at Pods project level
+            installer.pods_project.build_configurations.each do |config|
+              config.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'
+              config.build_settings['SWIFT_VERSION'] = '5.0'
+            end
+            # Also set for each pod target, force Swift 5 to bypass concurrency errors
             installer.pods_project.targets.each do |target|
               target.build_configurations.each do |config|
                 config.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'
+                config.build_settings['SWIFT_VERSION'] = '5.0'
               end
             end
           end
