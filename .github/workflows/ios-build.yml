@@ -44,13 +44,17 @@ jobs:
 
       - name: Patch Podfile for Swift 6 concurrency
         run: |
-          ruby -e '
-            podfile = File.read("ios/Podfile")
-            unless podfile.include?("SWIFT_STRICT_CONCURRENCY")
-              podfile.sub!("post_install do |installer|", "post_install do |installer|\n  installer.pods_project.targets.each do |target|\n    target.build_configurations.each do |config|\n      config.build_settings[\"SWIFT_STRICT_CONCURRENCY\"] = \"minimal\"\n    end\n  end")
-              File.write("ios/Podfile", podfile)
+          cat >> ios/Podfile << 'EOF'
+
+          # Patch: disable Swift 6 strict concurrency for all pods
+          post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              target.build_configurations.each do |config|
+                config.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'
+              end
             end
-          '
+          end
+          EOF
 
       - name: Install pods
         run: cd ios && pod install
