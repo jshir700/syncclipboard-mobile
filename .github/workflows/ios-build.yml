@@ -44,28 +44,23 @@ jobs:
 
       - name: Patch Podfile for Swift 6 concurrency
         run: |
-          echo "=== Original Podfile (first 5 lines) ==="
-          head -5 ios/Podfile
-          echo "=== Original Podfile (last 20 lines) ==="
-          tail -20 ios/Podfile
-
-          ruby -e "
-            lines = File.readlines('ios/Podfile')
-            modified = false
-            lines.each_with_index do |line, i|
-              if line.match?(/^\s*post_install\s+do/)
-                lines.insert(i + 1, %(  installer.pods_project.build_configurations.each {|c| c.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'}\n  installer.pods_project.targets.each {|t| t.build_configurations.each {|c| c.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'}}\n))
-                modified = true
-                break
-              end
-            end
-            unless modified
-              lines << %(\npost_install do |installer|\n  installer.pods_project.build_configurations.each {|c| c.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'}\n  installer.pods_project.targets.each {|t| t.build_configurations.each {|c| c.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'}}\nend\n)
-            end
-            File.write('ios/Podfile', lines.join)
-          "
-          echo "=== Patched Podfile (last 20 lines) ==="
-          tail -20 ios/Podfile
+          ruby << 'RUBY'
+          podfile = File.read("ios/Podfile")
+          patch = %q(
+            installer.pods_project.build_configurations.each {|c| c.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"}
+            installer.pods_project.targets.each {|t| t.build_configurations.each {|c| c.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"}}
+            installer.pods_project.targets.each {|t| t.build_configurations.each {|c| c.build_settings["GCC_TREAT_WARNINGS_AS_ERRORS"] = "NO"}}
+          ).strip
+          if podfile.sub!(/^(\s*post_install\s+do\s*\|.*?\n)/, "\\1#{patch}\n")
+            puts "Patched existing post_install"
+          else
+            podfile << "\npost_install do |installer|\n#{patch}\nend\n"
+            puts "Added new post_install"
+          end
+          File.write("ios/Podfile", podfile)
+          puts "=== Podfile last 20 lines ==="
+          puts File.readlines("ios/Podfile").last(20).join
+          RUBY
 
       - name: Install pods
         run: cd ios && pod install
@@ -84,6 +79,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM="" \
             SWIFT_STRICT_CONCURRENCY=minimal \
+            GCC_TREAT_WARNINGS_AS_ERRORS=NO \
             -quiet
 
       - name: Package IPA
