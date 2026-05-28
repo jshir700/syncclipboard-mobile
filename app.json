@@ -59,6 +59,8 @@
       "./plugins/build/withShizukuProvider.js",
       "./plugins/build/withDarkSplashScreen.js",
       "./plugins/build/withAbiSplits.js",
+      "./plugins/build/withSwiftConcurrency.js",
+      "./plugins/build/withIosAppGroup.js",
       [
         "expo-sharing",
         {
