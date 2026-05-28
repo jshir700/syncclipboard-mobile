@@ -13,22 +13,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.jshir700.syncclipboardmobile",
-      "infoPlist": {
-        "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
-        },
-        "UIBackgroundModes": ["fetch", "processing"],
-        "BGTaskSchedulerPermittedIdentifiers": [
-          "com.jshir700.syncclipboardmobile.refresh",
-          "com.jshir700.syncclipboardmobile.processing"
-        ],
-        "CFBundleDevelopmentRegion": "zh-Hans",
-        "CFBundleDisplayName": "SyncClipboard",
-        "CFBundleShortVersionString": "1.0.11",
-        "LSApplicationQueriesSchemes": ["syncclipboard"]
-      }
+      "supportsTablet": true
     },
     "android": {
       "versionCode": 151,
@@ -38,7 +23,9 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.jshir700.syncclipboardmobile",
-      "permissions": ["android.permission.REQUEST_INSTALL_PACKAGES"]
+      "permissions": [
+        "android.permission.REQUEST_INSTALL_PACKAGES"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -64,7 +51,9 @@
         {
           "android": {
             "enabled": true,
-            "singleShareMimeTypes": ["*/*"]
+            "singleShareMimeTypes": [
+              "*/*"
+            ]
           }
         }
       ],

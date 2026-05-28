@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Linking } from 'react-native';
+import { ToastAndroid, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { showToast } from '@/utils/toast';
 import { SyncDirection } from '@/types/sync';
 import { ClipboardContent } from '@/types/clipboard';
 import {
@@ -73,7 +72,7 @@ export const QuickTileLoadingScreen: React.FC<QuickTileLoadingScreenProps> = ({
       if (content && content.type === 'Text' && !isTextInvalid(content.text)) {
         const preview = content.text.trim().replace(/\s+/g, ' ');
         const toastMessage = preview.length > 40 ? preview.slice(0, 40) + '…' : preview;
-        showToast(toastMessage);
+        ToastAndroid.show(toastMessage, ToastAndroid.SHORT);
       }
 
       // 下载了非文本文件时，存入 state，触发重渲染更新 successButtons
@@ -101,7 +100,7 @@ export const QuickTileLoadingScreen: React.FC<QuickTileLoadingScreenProps> = ({
             onPress: async () => {
               try {
                 await Clipboard.setStringAsync(fileContent.text!);
-                showToast(t('quickTile.copied'));
+                ToastAndroid.show(t('quickTile.copied'), ToastAndroid.SHORT);
               } catch {}
             },
           },
@@ -132,18 +131,18 @@ export const QuickTileLoadingScreen: React.FC<QuickTileLoadingScreenProps> = ({
               try {
                 if (fileContent.type === 'Image') {
                   await saveToGallery(fileContent.fileUri!);
-                  showToast(t('quickTile.savedToGallery'));
+                  ToastAndroid.show(t('quickTile.savedToGallery'), ToastAndroid.SHORT);
                 } else {
                   await saveFile(fileContent.fileUri!, fileContent.fileName);
-                  showToast(t('quickTile.savedToDevice'));
+                  ToastAndroid.show(t('quickTile.savedToDevice'), ToastAndroid.SHORT);
                 }
               } catch (error) {
                 console.error('[QuickTileLoadingScreen] Failed to save file:', error);
                 if (error instanceof Error && error.message === 'Media library permission denied') {
-                  showToast(t('quickTile.galleryPermissionRequired'));
+                  ToastAndroid.show(t('quickTile.galleryPermissionRequired'), ToastAndroid.SHORT);
                   return;
                 }
-                showToast(t('quickTile.saveFailed'));
+                ToastAndroid.show(t('quickTile.saveFailed'), ToastAndroid.SHORT);
               }
             },
           },
