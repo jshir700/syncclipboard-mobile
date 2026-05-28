@@ -95,11 +95,8 @@ export async function contentToProfileDto(
 }
 
 /**
- * 将 ProfileDto 转换为 ClipboardContent
+ * 将 ProfileDto 转换为 ClipboardContent（异步版本，支持解密）
  */
-export function profileDtoToContent(profile: ProfileDto): ClipboardContent {
-  const { type, text, hash, hasData, dataName, size } = profile;
-
 export async function profileDtoToContentAsync(profile: ProfileDto): Promise<ClipboardContent> {
   const { type, text, hash, hasData, dataName, size, encrypted } = profile;
 
