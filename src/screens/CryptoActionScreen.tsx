@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
-import {
-  encryptText,
-  decryptText,
-  loadOrDeriveKey,
-} from '@/services/crypto/CryptoService';
+import { encryptText, decryptText, loadOrDeriveKey } from '@/services/crypto/CryptoService';
 import { useSettingsStore } from '@/stores';
 
 interface Props {
@@ -94,9 +90,7 @@ export function CryptoActionScreen({ action, text, password, callback, onComplet
           </Text>
         )}
         {status === 'error' && (
-          <Text style={[styles.text, { color: '#f44336' }]}>
-            {errorMsg || 'Failed'}
-          </Text>
+          <Text style={[styles.text, { color: '#f44336' }]}>{errorMsg || 'Failed'}</Text>
         )}
       </View>
     </View>

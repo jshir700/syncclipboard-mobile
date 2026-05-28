@@ -26,7 +26,7 @@ async function ensureNoble(): Promise<boolean> {
   } catch {
     console.error(
       '@noble/ciphers and @noble/hashes are required for E2E encryption.\n' +
-      'Run: npm install @noble/ciphers @noble/hashes'
+        'Run: npm install @noble/ciphers @noble/hashes'
     );
     return false;
   }
@@ -43,7 +43,12 @@ const VERIFY_PREFIX = 'SyncClipboardE2EE:v1:verify:';
 
 // ====== Pure JS PBKDF2 using js-sha256 (fallback) ======
 
-function pbkdf2Sync(password: string, salt: Uint8Array, iterations: number, keyLen: number): Uint8Array {
+function pbkdf2Sync(
+  password: string,
+  salt: Uint8Array,
+  iterations: number,
+  keyLen: number
+): Uint8Array {
   const encoder = new TextEncoder();
   const passwordBytes = encoder.encode(password);
   const hLen = 32; // SHA-256 output = 32 bytes
@@ -75,8 +80,10 @@ function pbkdf2Sync(password: string, salt: Uint8Array, iterations: number, keyL
       }
     }
 
-    result.set(blockOutput.subarray(0, Math.min(hLen, keyLen - (blockIndex - 1) * hLen)),
-                (blockIndex - 1) * hLen);
+    result.set(
+      blockOutput.subarray(0, Math.min(hLen, keyLen - (blockIndex - 1) * hLen)),
+      (blockIndex - 1) * hLen
+    );
   }
 
   return result;
@@ -85,7 +92,10 @@ function pbkdf2Sync(password: string, salt: Uint8Array, iterations: number, keyL
 function computeHMAC(key: Uint8Array, message: Uint8Array): Uint8Array {
   // Use js-sha256's HMAC
   // sha256.hmac expects key and message as strings or Uint8Arrays
-  const hmac = sha256.hmac as unknown as (key: Uint8Array | string, message: Uint8Array | string) => Uint8Array | string;
+  const hmac = sha256.hmac as unknown as (
+    key: Uint8Array | string,
+    message: Uint8Array | string
+  ) => Uint8Array | string;
   const result = hmac(key, message);
   if (typeof result === 'string') {
     return new TextEncoder().encode(result);
@@ -254,7 +264,9 @@ export async function encryptFile(
     encoding: fs.EncodingType.Base64,
   });
   const plainBytes = new Uint8Array(
-    atob(base64Content).split('').map(c => c.charCodeAt(0))
+    atob(base64Content)
+      .split('')
+      .map((c) => c.charCodeAt(0))
   );
   const cipherBytes = await encryptBytes(plainBytes);
   const b64 = btoa(String.fromCharCode(...cipherBytes));
@@ -275,7 +287,9 @@ export async function decryptFile(
     encoding: fs.EncodingType.Base64,
   });
   const cipherBytes = new Uint8Array(
-    atob(base64Content).split('').map(c => c.charCodeAt(0))
+    atob(base64Content)
+      .split('')
+      .map((c) => c.charCodeAt(0))
   );
   const plainBytes = await decryptBytes(cipherBytes);
   const b64 = btoa(String.fromCharCode(...plainBytes));

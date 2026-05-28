@@ -1,22 +1,13 @@
 import { Platform } from 'react-native';
-import {
-  requireNativeModule,
-  type EventSubscription,
-} from 'expo-modules-core';
+import { requireNativeModule, type EventSubscription } from 'expo-modules-core';
 
 interface IosBgTaskInterface {
   registerBackgroundTasks(): void;
   scheduleAppRefresh(delaySeconds?: number): void;
   scheduleProcessingTask(delaySeconds?: number): void;
   cancelAllTasks(): void;
-  addListener(
-    eventName: 'onBackgroundRefresh',
-    listener: () => void
-  ): EventSubscription;
-  addListener(
-    eventName: 'onBackgroundProcessing',
-    listener: () => void
-  ): EventSubscription;
+  addListener(eventName: 'onBackgroundRefresh', listener: () => void): EventSubscription;
+  addListener(eventName: 'onBackgroundProcessing', listener: () => void): EventSubscription;
 }
 
 let nativeModule: IosBgTaskInterface | null = null;
@@ -76,8 +67,6 @@ export function onBackgroundRefresh(handler: () => void): EventSubscription | nu
  * Listen for background processing events from iOS.
  * Handler must complete within ~55 seconds.
  */
-export function onBackgroundProcessing(
-  handler: () => void
-): EventSubscription | null {
+export function onBackgroundProcessing(handler: () => void): EventSubscription | null {
   return getModule()?.addListener('onBackgroundProcessing', handler) ?? null;
 }

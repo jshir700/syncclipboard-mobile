@@ -50,11 +50,19 @@ import { Plus, RefreshCw, Check, ChevronDown, ChevronUp } from 'react-native-fea
 // Android-only modules — lazy loaded via Platform.OS guards
 const getClipboardOverlay = () => {
   if (Platform.OS !== 'android') return null;
-  try { return require('clipboard-overlay'); } catch { return null; }
+  try {
+    return require('clipboard-overlay');
+  } catch {
+    return null;
+  }
 };
 const getShizukuClipboard = () => {
   if (Platform.OS !== 'android') return null;
-  try { return require('shizuku-clipboard'); } catch { return null; }
+  try {
+    return require('shizuku-clipboard');
+  } catch {
+    return null;
+  }
 };
 import { extractVerificationCode } from '@/tasks/SmsUploadTask';
 import { useTranslation } from 'react-i18next';
@@ -267,11 +275,11 @@ export const SettingsScreen = () => {
         PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECEIVE_SMS),
       ]);
       setPermNotification(notif);
-      setPermOverlay((getClipboardOverlay()?.hasOverlayPermission() ?? false));
+      setPermOverlay(getClipboardOverlay()?.hasOverlayPermission() ?? false);
       setPermSms(sms);
       const { isIgnoringBatteryOptimizations } = await import('native-util');
       setPermBattery(isIgnoringBatteryOptimizations());
-      const shizukuUp = (getShizukuClipboard()?.isShizukuAvailable() ?? false);
+      const shizukuUp = getShizukuClipboard()?.isShizukuAvailable() ?? false;
       setShizukuAvailable(shizukuUp);
       setPermShizuku(shizukuUp && (getShizukuClipboard()?.hasShizukuPermission() ?? false));
     } catch (e) {

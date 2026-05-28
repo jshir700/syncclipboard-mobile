@@ -2,7 +2,11 @@ import { Platform } from 'react-native';
 
 const getShortcutModule = () => {
   if (Platform.OS !== 'android') return null;
-  try { return require('shortcut'); } catch { return null; }
+  try {
+    return require('shortcut');
+  } catch {
+    return null;
+  }
 };
 
 export const shortcut = {

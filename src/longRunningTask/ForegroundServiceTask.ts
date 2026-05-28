@@ -19,7 +19,11 @@ import { configService } from '../services/ConfigService';
 
 const getForegroundService = () => {
   if (Platform.OS !== 'android') return null;
-  try { return require('foreground-service'); } catch { return null; }
+  try {
+    return require('foreground-service');
+  } catch {
+    return null;
+  }
 };
 import { backgroundRuntimeState } from '../services/BackgroundRuntimeState';
 
@@ -120,12 +124,16 @@ class ForegroundServiceTask extends LongRunningTask {
 
   /** 绑定通知栏操作监听 */
   private _attachServiceListeners(): void {
-    this._stopSub = (getForegroundService()?.addStopListener ?? (() => ({ remove: () => {} })))(() => {
-      configService.updateConfig({ enableBackgroundTasks: false }).catch((e) => {
-        console.error('[ForegroundServiceTask] Failed to disable background tasks:', e);
-      });
-    });
-    this._tempStopSub = (getForegroundService()?.addTempStopListener ?? (() => ({ remove: () => {} })))(() => {
+    this._stopSub = (getForegroundService()?.addStopListener ?? (() => ({ remove: () => {} })))(
+      () => {
+        configService.updateConfig({ enableBackgroundTasks: false }).catch((e) => {
+          console.error('[ForegroundServiceTask] Failed to disable background tasks:', e);
+        });
+      }
+    );
+    this._tempStopSub = (
+      getForegroundService()?.addTempStopListener ?? (() => ({ remove: () => {} }))
+    )(() => {
       backgroundRuntimeState.setTempDisabled(true);
     });
   }

@@ -138,10 +138,21 @@ export default function App() {
         setShareReceiveOverlay(true);
         return;
       }
-      const { isCryptoAction, action: cryptoAction, text: cryptoText, password: cryptoPass, callback } = parseCryptoUrl(url);
+      const {
+        isCryptoAction,
+        action: cryptoAction,
+        text: cryptoText,
+        password: cryptoPass,
+        callback,
+      } = parseCryptoUrl(url);
       if (isCryptoAction) {
         setAppMode('home');
-        setCryptoOverlay({ action: cryptoAction, text: cryptoText, password: cryptoPass, callback });
+        setCryptoOverlay({
+          action: cryptoAction,
+          text: cryptoText,
+          password: cryptoPass,
+          callback,
+        });
         return;
       }
       const processText = parseProcessTextUrl(url);
@@ -168,9 +179,20 @@ export default function App() {
         setShareReceiveOverlay(true);
         return;
       }
-      const { isCryptoAction, action: cryptoAction, text: cryptoText, password: cryptoPass, callback } = parseCryptoUrl(url);
+      const {
+        isCryptoAction,
+        action: cryptoAction,
+        text: cryptoText,
+        password: cryptoPass,
+        callback,
+      } = parseCryptoUrl(url);
       if (isCryptoAction) {
-        setCryptoOverlay({ action: cryptoAction, text: cryptoText, password: cryptoPass, callback });
+        setCryptoOverlay({
+          action: cryptoAction,
+          text: cryptoText,
+          password: cryptoPass,
+          callback,
+        });
         return;
       }
       const processText = parseProcessTextUrl(url);

@@ -6,11 +6,7 @@
  */
 
 import { Platform, AppState } from 'react-native';
-import {
-  registerBackgroundTasks,
-  scheduleAppRefresh,
-  onBackgroundRefresh,
-} from 'ios-bg-task';
+import { registerBackgroundTasks, scheduleAppRefresh, onBackgroundRefresh } from 'ios-bg-task';
 import { fetchRemoteClipboard } from './sync/ClipboardSyncActions';
 export { fetchRemoteClipboard } from './sync/ClipboardSyncActions';
 import { getAPIClient } from './ClientFactory';
