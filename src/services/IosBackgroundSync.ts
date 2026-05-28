@@ -36,7 +36,7 @@ export function initIosBackgroundSync(): void {
   bgRefreshSub = onBackgroundRefresh(async () => {
     console.log('[IosBgSync] Background refresh triggered');
     try {
-      const client = getAPIClient();
+      const client = await getAPIClient();
       const profile = await client.getClipboard();
       if (profile && profile.text) {
         // Trigger the normal sync pipeline

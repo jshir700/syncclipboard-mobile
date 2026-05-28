@@ -39,17 +39,12 @@ export async function checkSharedContent(): Promise<SharedPayload | null> {
  * Files saved by the share extension are located here.
  */
 function getContainerUrl(): string {
-  // expo-file-system documentDirectory doesn't point to the App Group.
-  // We need to construct the URL manually.
-  // ~/Library/Group Containers/{APP_GROUP_ID}/
-  const home = FileSystem.documentDirectory!.split('/Documents')[0];
-  // Actually use the native module if available, or construct from sandbox
-  // The reliable way in React Native: NSFileManager.default.containerURL
+  // Use the native module to get the App Group container URL
   if (NativeModules.IosShareExtension?.getContainerUrl) {
     return NativeModules.IosShareExtension.getContainerUrl();
   }
-  // Fallback: construct path (less reliable)
-  return `${home}/Library/Group Containers/${APP_GROUP_ID}`;
+  // Fallback
+  return '';
 }
 
 /**

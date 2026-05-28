@@ -160,7 +160,7 @@ class RemoteClipboardMonitor {
     }
   };
 
-  private readonly _signalREventCallback = (event: ProfileChangedEvent): void => {
+  private readonly _signalREventCallback = async (event: ProfileChangedEvent): Promise<void> => {
     try {
       const profile = {
         type: event.type as 'Text' | 'Image' | 'File' | 'Group',

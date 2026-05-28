@@ -16,7 +16,7 @@ interface Props {
   onComplete: () => void;
 }
 
-export function CryptoActionScreen({ action, text, callback, onComplete }: Props) {
+export function CryptoActionScreen({ action, text, password, callback, onComplete }: Props) {
   const { theme } = useTheme();
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading');
   const [errorMsg, setErrorMsg] = useState('');

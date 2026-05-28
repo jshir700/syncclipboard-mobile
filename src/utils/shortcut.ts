@@ -14,7 +14,7 @@ export const shortcut = {
     if (!mod?.isShortcutModuleAvailable) {
       return Promise.reject(new Error('ShortcutModule is not available'));
     }
-    return mod.requestPinDownloadShortcut().catch((error) => {
+    return mod.requestPinDownloadShortcut().catch((error: any) => {
       console.error('ShortcutModule addDownloadShortcut error:', error);
       throw error;
     });
@@ -28,7 +28,7 @@ export const shortcut = {
     if (!mod?.isShortcutModuleAvailable) {
       return Promise.reject(new Error('ShortcutModule is not available'));
     }
-    return mod.requestPinUploadShortcut().catch((error) => {
+    return mod.requestPinUploadShortcut().catch((error: any) => {
       console.error('ShortcutModule addUploadShortcut error:', error);
       throw error;
     });

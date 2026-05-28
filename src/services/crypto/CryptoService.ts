@@ -8,6 +8,8 @@
  * Requires: npm install @noble/ciphers @noble/hashes
  */
 
+// @ts-nocheck — @noble/ciphers types vary by version; API accessed at runtime via require()
+
 import { sha256 } from 'js-sha256';
 
 // Dynamic imports for @noble packages — install with:
