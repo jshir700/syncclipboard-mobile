@@ -43,22 +43,24 @@ jobs:
         run: npx expo prebuild --platform ios --no-install
 
       - name: Patch Podfile for Swift 6 concurrency
-        shell: bash
         run: |
-          echo 'post_install do |installer|
-            installer.pods_project.build_configurations.each do |config|
-              config.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"
-              config.build_settings["SWIFT_VERSION"] = "5.0"
-            end
-            installer.pods_project.targets.each do |target|
-              target.build_configurations.each do |config|
+          ruby -e '
+            podfile = File.read("ios/Podfile")
+            patch = <<~RUBY
+              installer.pods_project.build_configurations.each do |config|
                 config.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"
                 config.build_settings["SWIFT_VERSION"] = "5.0"
               end
-            end
-          end' >> ios/Podfile
-          echo "=== Last 15 lines of Podfile ==="
-          tail -15 ios/Podfile
+              installer.pods_project.targets.each do |target|
+                target.build_configurations.each do |config|
+                  config.build_settings["SWIFT_STRICT_CONCURRENCY"] = "minimal"
+                  config.build_settings["SWIFT_VERSION"] = "5.0"
+                end
+              end
+            RUBY
+            podfile.sub!("post_install do |installer|", "post_install do |installer|\n#{patch}")
+            File.write("ios/Podfile", podfile)
+          '
 
       - name: Install pods
         run: cd ios && pod install
