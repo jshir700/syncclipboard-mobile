@@ -12,7 +12,6 @@ on:
 
 jobs:
   code-style:
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     uses: ./.github/workflows/code-style.yml
 
   android-build:
@@ -22,7 +21,6 @@ jobs:
     uses: ./.github/workflows/ios-build.yml
 
   unit-tests:
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     uses: ./.github/workflows/test.yml
 
   publish-release:
@@ -66,7 +64,7 @@ jobs:
   sync-to-gitee:
     name: Sync to Gitee
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
-    needs: [android-build]
+    needs: [code-style, android-build, unit-tests]
     runs-on: ubuntu-latest
 
     steps:
