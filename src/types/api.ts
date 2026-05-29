@@ -64,6 +64,12 @@ export interface ServerConfig {
 
   /** S3 是否使用路径风格寻址（仅 S3 类型） */
   forcePathStyle?: boolean;
+
+  /** E2E 加密是否启用 */
+  encryptionEnabled?: boolean;
+
+  /** E2E 加密密码验证哈希 */
+  encryptionPasswordHash?: string;
 }
 
 /**

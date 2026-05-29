@@ -124,12 +124,6 @@ export interface AppConfig {
 
   /** 是否在历史记录的图片项显示复制按钮 */
   showImageCopyButton: boolean;
-
-  /** E2E 加密：是否启用 */
-  encryptionEnabled: boolean;
-
-  /** E2E 加密：密码验证哈希（SHA256 hex），留空表示未设置密码 */
-  encryptionPasswordHash: string;
 }
 
 /**
@@ -335,8 +329,6 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   hideFromRecents: false, // 默认不隐藏最近任务
   historyImageAutoDownload: 'wifi', // 默认 Wi-Fi 网络自动下载
   showImageCopyButton: false, // 默认不显示图片复制按钮
-  encryptionEnabled: false, // 默认关闭 E2E 加密
-  encryptionPasswordHash: '', // 未设置密码
 };
 
 /**

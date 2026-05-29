@@ -60,6 +60,10 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
   const [bucketName, setBucketName] = useState(initialConfig?.bucketName || '');
   const [objectPrefix, setObjectPrefix] = useState(initialConfig?.objectPrefix || '');
   const [forcePathStyle, setForcePathStyle] = useState(initialConfig?.forcePathStyle ?? false);
+  const [encryptionEnabled, setEncryptionEnabled] = useState(initialConfig?.encryptionEnabled ?? false);
+  const [encryptionPassword, setEncryptionPassword] = useState('');
+  const [encryptionHash, setEncryptionHash] = useState(initialConfig?.encryptionPasswordHash || '');
+  const [encryptionUnlocked, setEncryptionUnlocked] = useState(false);
 
   const bucketNameRef = useRef<TextInput>(null);
   const regionRef = useRef<TextInput>(null);
@@ -76,6 +80,10 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
       setBucketName(initialConfig.bucketName || '');
       setObjectPrefix(initialConfig.objectPrefix || '');
       setForcePathStyle(initialConfig.forcePathStyle ?? false);
+      setEncryptionEnabled(initialConfig.encryptionEnabled ?? false);
+      setEncryptionHash(initialConfig.encryptionPasswordHash || '');
+      setEncryptionPassword('');
+      setEncryptionUnlocked(false);
     } else if (visible && !initialConfig) {
       setType('syncclipboard');
       setUrl('');
@@ -232,6 +240,8 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
         objectPrefix: objectPrefix.trim(),
         forcePathStyle,
       }),
+      encryptionEnabled,
+      encryptionPasswordHash: encryptionEnabled ? encryptionHash : undefined,
     };
 
     onSave(config);
@@ -655,6 +665,92 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                     </View>
                   </>
                 )}
+                {/* End-to-End Encryption */}
+                <View style={[styles.fieldContainer, { borderBottomColor: theme.colors.divider }]}>
+                  <View style={styles.switchRow}>
+                    <View style={styles.fieldLabelContainer}>
+                      <Text style={[styles.fieldLabel, { color: theme.colors.text }]}>
+                        End-to-End Encryption
+                      </Text>
+                      <Text style={[styles.fieldDescription, { color: theme.colors.textSecondary }]}>
+                        Same password on all devices to encrypt clipboard data
+                      </Text>
+                    </View>
+                    <Switch
+                      value={encryptionEnabled}
+                      onValueChange={(v) => {
+                        setEncryptionEnabled(v);
+                        if (!v) {
+                          setEncryptionHash('');
+                          setEncryptionUnlocked(false);
+                          setEncryptionPassword('');
+                        }
+                      }}
+                    />
+                  </View>
+                  {encryptionEnabled && (
+                    <View style={styles.encryptionSection}>
+                      <View style={styles.encryptionRow}>
+                        <TextInput
+                          style={[
+                            styles.textInput,
+                            styles.encryptionInput,
+                            {
+                              color: theme.colors.text,
+                              backgroundColor: theme.colors.background,
+                              borderColor: theme.colors.divider,
+                            },
+                          ]}
+                          placeholder="Encryption password"
+                          placeholderTextColor={theme.colors.textTertiary}
+                          value={encryptionPassword}
+                          onChangeText={setEncryptionPassword}
+                          secureTextEntry
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                        />
+                        <TouchableOpacity
+                          style={[
+                            styles.encryptionButton,
+                            { backgroundColor: theme.colors.primary + '20' },
+                          ]}
+                          onPress={() => {
+                            if (!encryptionPassword.trim()) return;
+                            try {
+                              const { setPassword, loadOrDeriveKey } = require('@/services/crypto/CryptoService');
+                              if (encryptionHash) {
+                                loadOrDeriveKey(encryptionPassword, encryptionHash);
+                              } else {
+                                const hash = setPassword(encryptionPassword);
+                                setEncryptionHash(hash);
+                              }
+                              setEncryptionUnlocked(true);
+                              setEncryptionPassword('');
+                            } catch (e: any) {
+                              Alert.alert('Error', e.message || 'Failed');
+                            }
+                          }}
+                        >
+                          <Text style={[styles.encryptionButtonText, { color: theme.colors.primary }]}>
+                            {encryptionHash ? 'Unlock' : 'Set Password'}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Text
+                        style={[
+                          styles.encryptionStatus,
+                          { color: encryptionHash ? (encryptionUnlocked ? '#4CAF50' : theme.colors.error) : theme.colors.textSecondary },
+                        ]}
+                      >
+                        {encryptionHash
+                          ? encryptionUnlocked
+                            ? '✓ Key loaded'
+                            : '⚠ Enter password to unlock'
+                          : 'Set a password to enable encryption'}
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
           </ScrollView>
@@ -828,5 +924,50 @@ const styles = StyleSheet.create({
   },
   headerButtonBold: {
     fontWeight: '600',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  fieldLabelContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  fieldLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  fieldDescription: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  encryptionSection: {
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  encryptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  encryptionInput: {
+    flex: 1,
+    height: 40,
+  },
+  encryptionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  encryptionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  encryptionStatus: {
+    fontSize: 12,
+    marginTop: 6,
+    paddingLeft: 4,
   },
 });
