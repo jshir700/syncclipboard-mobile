@@ -60,7 +60,9 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
   const [bucketName, setBucketName] = useState(initialConfig?.bucketName || '');
   const [objectPrefix, setObjectPrefix] = useState(initialConfig?.objectPrefix || '');
   const [forcePathStyle, setForcePathStyle] = useState(initialConfig?.forcePathStyle ?? false);
-  const [encryptionEnabled, setEncryptionEnabled] = useState(initialConfig?.encryptionEnabled ?? false);
+  const [encryptionEnabled, setEncryptionEnabled] = useState(
+    initialConfig?.encryptionEnabled ?? false
+  );
   const [encryptionPassword, setEncryptionPassword] = useState('');
   const [encryptionHash, setEncryptionHash] = useState(initialConfig?.encryptionPasswordHash || '');
   const [encryptionUnlocked, setEncryptionUnlocked] = useState(false);
@@ -672,7 +674,9 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                       <Text style={[styles.fieldLabel, { color: theme.colors.text }]}>
                         End-to-End Encryption
                       </Text>
-                      <Text style={[styles.fieldDescription, { color: theme.colors.textSecondary }]}>
+                      <Text
+                        style={[styles.fieldDescription, { color: theme.colors.textSecondary }]}
+                      >
                         Same password on all devices to encrypt clipboard data
                       </Text>
                     </View>
@@ -717,7 +721,10 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                           onPress={() => {
                             if (!encryptionPassword.trim()) return;
                             try {
-                              const { setPassword, loadOrDeriveKey } = require('@/services/crypto/CryptoService');
+                              const {
+                                setPassword,
+                                loadOrDeriveKey,
+                              } = require('@/services/crypto/CryptoService');
                               if (encryptionHash) {
                                 loadOrDeriveKey(encryptionPassword, encryptionHash);
                               } else {
@@ -731,7 +738,9 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                             }
                           }}
                         >
-                          <Text style={[styles.encryptionButtonText, { color: theme.colors.primary }]}>
+                          <Text
+                            style={[styles.encryptionButtonText, { color: theme.colors.primary }]}
+                          >
                             {encryptionHash ? 'Unlock' : 'Set Password'}
                           </Text>
                         </TouchableOpacity>
@@ -739,7 +748,13 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                       <Text
                         style={[
                           styles.encryptionStatus,
-                          { color: encryptionHash ? (encryptionUnlocked ? '#4CAF50' : theme.colors.error) : theme.colors.textSecondary },
+                          {
+                            color: encryptionHash
+                              ? encryptionUnlocked
+                                ? '#4CAF50'
+                                : theme.colors.error
+                              : theme.colors.textSecondary,
+                          },
                         ]}
                       >
                         {encryptionHash
