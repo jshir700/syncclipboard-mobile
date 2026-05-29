@@ -247,7 +247,9 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
               try {
                 const { setPassword } = require('@/services/crypto/CryptoService');
                 return setPassword(encryptionPassword);
-              } catch { return encryptionHash; }
+              } catch {
+                return encryptionHash;
+              }
             })()
           : encryptionHash
         : undefined,
