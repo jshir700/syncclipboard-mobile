@@ -666,7 +666,7 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                   </>
                 )}
                 {/* End-to-End Encryption */}
-                <View style={[styles.fieldContainer, { borderBottomColor: theme.colors.divider }]}>
+                <View style={[styles.inputGroup, { borderBottomColor: theme.colors.divider }]}>
                   <View style={styles.switchRow}>
                     <View style={styles.fieldLabelContainer}>
                       <Text style={[styles.fieldLabel, { color: theme.colors.text }]}>
@@ -693,7 +693,7 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                       <View style={styles.encryptionRow}>
                         <TextInput
                           style={[
-                            styles.textInput,
+                            styles.input,
                             styles.encryptionInput,
                             {
                               color: theme.colors.text,
