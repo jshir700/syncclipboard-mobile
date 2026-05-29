@@ -1,3 +1,8 @@
+v1.0.11.3
+- New: E2E encryption per-server config with i18n / 新增: 按服务器配置的端到端加密，支持中英文
+- Fix: upload-artifact downgrade to v6 / 修复: 降级 upload-artifact 至 v6
+- Fix: encryption UI spacing / 修复: 加密 UI 间距
+
 v1.0.11.2
 - 新增：E2E 端到端加密支持 (AES-256-GCM + PBKDF2)
 - 新增：本地剪贴板历史存储 (100条)

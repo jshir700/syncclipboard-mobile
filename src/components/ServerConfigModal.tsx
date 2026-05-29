@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   encryptionSection: {
-    paddingTop: 8,
+    paddingTop: 16,
     paddingBottom: 4,
   },
   encryptionRow: {
