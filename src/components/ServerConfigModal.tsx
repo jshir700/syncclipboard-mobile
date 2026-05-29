@@ -65,7 +65,6 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
   );
   const [encryptionPassword, setEncryptionPassword] = useState('');
   const [encryptionHash, setEncryptionHash] = useState(initialConfig?.encryptionPasswordHash || '');
-  const [encryptionUnlocked, setEncryptionUnlocked] = useState(false);
 
   const bucketNameRef = useRef<TextInput>(null);
   const regionRef = useRef<TextInput>(null);
@@ -85,7 +84,6 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
       setEncryptionEnabled(initialConfig.encryptionEnabled ?? false);
       setEncryptionHash(initialConfig.encryptionPasswordHash || '');
       setEncryptionPassword('');
-      setEncryptionUnlocked(false);
     } else if (visible && !initialConfig) {
       setType('syncclipboard');
       setUrl('');
@@ -243,7 +241,16 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
         forcePathStyle,
       }),
       encryptionEnabled,
-      encryptionPasswordHash: encryptionEnabled ? encryptionHash : undefined,
+      encryptionPasswordHash: encryptionEnabled
+        ? encryptionPassword.trim()
+          ? (() => {
+              try {
+                const { setPassword } = require('@/services/crypto/CryptoService');
+                return setPassword(encryptionPassword);
+              } catch { return encryptionHash; }
+            })()
+          : encryptionHash
+        : undefined,
     };
 
     onSave(config);
@@ -672,12 +679,12 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                   <View style={styles.switchRow}>
                     <View style={styles.fieldLabelContainer}>
                       <Text style={[styles.fieldLabel, { color: theme.colors.text }]}>
-                        End-to-End Encryption
+                        {t('server.encryption')}
                       </Text>
                       <Text
                         style={[styles.fieldDescription, { color: theme.colors.textSecondary }]}
                       >
-                        Same password on all devices to encrypt clipboard data
+                        {t('server.encryptionDesc')}
                       </Text>
                     </View>
                     <Switch
@@ -686,7 +693,6 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                         setEncryptionEnabled(v);
                         if (!v) {
                           setEncryptionHash('');
-                          setEncryptionUnlocked(false);
                           setEncryptionPassword('');
                         }
                       }}
@@ -694,75 +700,27 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
                   </View>
                   {encryptionEnabled && (
                     <View style={styles.encryptionSection}>
-                      <View style={styles.encryptionRow}>
-                        <TextInput
-                          style={[
-                            styles.input,
-                            styles.encryptionInput,
-                            {
-                              color: theme.colors.text,
-                              backgroundColor: theme.colors.background,
-                              borderColor: theme.colors.divider,
-                            },
-                          ]}
-                          placeholder="Encryption password"
-                          placeholderTextColor={theme.colors.textTertiary}
-                          value={encryptionPassword}
-                          onChangeText={setEncryptionPassword}
-                          secureTextEntry
-                          autoCapitalize="none"
-                          autoCorrect={false}
-                        />
-                        <TouchableOpacity
-                          style={[
-                            styles.encryptionButton,
-                            { backgroundColor: theme.colors.primary + '20' },
-                          ]}
-                          onPress={() => {
-                            if (!encryptionPassword.trim()) return;
-                            try {
-                              const {
-                                setPassword,
-                                loadOrDeriveKey,
-                              } = require('@/services/crypto/CryptoService');
-                              if (encryptionHash) {
-                                loadOrDeriveKey(encryptionPassword, encryptionHash);
-                              } else {
-                                const hash = setPassword(encryptionPassword);
-                                setEncryptionHash(hash);
-                              }
-                              setEncryptionUnlocked(true);
-                              setEncryptionPassword('');
-                            } catch (e: any) {
-                              Alert.alert('Error', e.message || 'Failed');
-                            }
-                          }}
-                        >
-                          <Text
-                            style={[styles.encryptionButtonText, { color: theme.colors.primary }]}
-                          >
-                            {encryptionHash ? 'Unlock' : 'Set Password'}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      <Text
+                      <Text style={[styles.inputLabel, { color: theme.colors.text }]}>
+                        {t('server.encryptionPassword')}
+                      </Text>
+                      <TextInput
                         style={[
-                          styles.encryptionStatus,
+                          styles.input,
+                          styles.encryptionInput,
                           {
-                            color: encryptionHash
-                              ? encryptionUnlocked
-                                ? '#4CAF50'
-                                : theme.colors.error
-                              : theme.colors.textSecondary,
+                            color: theme.colors.text,
+                            backgroundColor: theme.colors.background,
+                            borderColor: theme.colors.divider,
                           },
                         ]}
-                      >
-                        {encryptionHash
-                          ? encryptionUnlocked
-                            ? '✓ Key loaded'
-                            : '⚠ Enter password to unlock'
-                          : 'Set a password to enable encryption'}
-                      </Text>
+                        placeholder={t('server.encryptionPasswordPlaceholder')}
+                        placeholderTextColor={theme.colors.textTertiary}
+                        value={encryptionPassword}
+                        onChangeText={setEncryptionPassword}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
                     </View>
                   )}
                 </View>

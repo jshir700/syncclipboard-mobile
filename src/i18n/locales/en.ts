@@ -417,6 +417,10 @@ const en: DeepString<typeof zh> = {
     confirmDeleteTitle: 'Confirm Delete',
     confirmDeleteMessage: 'Delete server "{{name}}"?',
     notSet: 'Not set',
+    encryption: 'End-to-End Encryption',
+    encryptionDesc: 'Same password on all devices to encrypt clipboard data',
+    encryptionPassword: 'Encryption Password',
+    encryptionPasswordPlaceholder: 'Enter encryption password',
   },
 
   transfer: {

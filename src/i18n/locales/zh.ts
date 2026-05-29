@@ -406,6 +406,10 @@ const zh = {
     confirmDeleteTitle: '确认删除',
     confirmDeleteMessage: '确定要删除服务器 "{{name}}" 吗？',
     notSet: '未设置',
+    encryption: '端到端加密',
+    encryptionDesc: '在所有设备上使用相同密码来加密剪贴板数据',
+    encryptionPassword: '加密密码',
+    encryptionPasswordPlaceholder: '请输入加密密码',
   },
 
   transfer: {
